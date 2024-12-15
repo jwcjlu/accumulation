@@ -1,5 +1,4 @@
-#include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include <common.h>
 
 SEC("tracepoint/syscalls/sys_enter_execve")
 
