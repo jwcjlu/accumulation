@@ -52,8 +52,7 @@ func main() {
 
 	// Open a Uretprobe at the exit point of the symbol and attach
 	// the pre-compiled eBPF program to it.
-	log.Println(objs.UprobeFetchMessage.Type())
-	up, err := ex.Uprobe(symbol, objs.UprobeFetchMessage, nil)
+	up, err := ex.Uprobe(symbol, objs.UprobeFetchMessageRet, nil)
 	if err != nil {
 		log.Fatalf("creating uretprobe: %s", err)
 	}

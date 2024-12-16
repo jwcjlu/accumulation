@@ -9,8 +9,8 @@ struct event {
 	u8 line[80];
 };
 
-SEC("uretprobe/FetchMessage")
-int uprobe_FetchMessage(struct pt_regs *ctx) {
+SEC("uretprobe/FetchMessageRet")
+int uprobe_FetchMessageRet(struct pt_regs *ctx) {
         char msg[] = "your_message_here";
 
     // Increment the counter

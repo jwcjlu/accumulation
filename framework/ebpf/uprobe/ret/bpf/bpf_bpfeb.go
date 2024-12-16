@@ -53,7 +53,7 @@ type bpfSpecs struct {
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpfProgramSpecs struct {
-	UprobeFetchMessage *ebpf.ProgramSpec `ebpf:"uprobe_FetchMessage"`
+	UprobeFetchMessageRet *ebpf.ProgramSpec `ebpf:"uprobe_FetchMessageRet"`
 }
 
 // bpfMapSpecs contains maps before they are loaded into the kernel.
@@ -91,12 +91,12 @@ func (m *bpfMaps) Close() error {
 //
 // It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpfPrograms struct {
-	UprobeFetchMessage *ebpf.Program `ebpf:"uprobe_FetchMessage"`
+	UprobeFetchMessageRet *ebpf.Program `ebpf:"uprobe_FetchMessageRet"`
 }
 
 func (p *bpfPrograms) Close() error {
 	return _BpfClose(
-		p.UprobeFetchMessage,
+		p.UprobeFetchMessageRet,
 	)
 }
 
