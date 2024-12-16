@@ -2,7 +2,9 @@ package demo
 
 import "fmt"
 
-func FetchMessage() {
-	fmt.Println("helle world ")
+var index = 0
 
+func FetchMessage() {
+	index++
+	fmt.Println(fmt.Sprintf("hello world %d!", index))
 }
