@@ -24,8 +24,8 @@ const (
 	// dynamically-linked library, so the path of the library will need
 	// to be specified instead, e.g. /usr/lib/libreadline.so.8.
 	// Use `ldd /bin/bash` to find these paths.
-	binPath = "/root/jas/workspace/accumulation/framework/ebpf/uprobe"
-	symbol  = "FetchMessage"
+	binPath = "/root/jas/workspace/accumulation/framework/ebpf/uprobe/uprobe"
+	symbol  = "accumulation/framework/ebpf/uprobe/demo.FetchMessage"
 )
 
 func main() {
@@ -52,7 +52,8 @@ func main() {
 
 	// Open a Uretprobe at the exit point of the symbol and attach
 	// the pre-compiled eBPF program to it.
-	up, err := ex.Uretprobe(symbol, objs.UprobeFetchMessage, nil)
+	log.Println(objs.UprobeFetchMessage.Type())
+	up, err := ex.Uprobe(symbol, objs.UprobeFetchMessage, nil)
 	if err != nil {
 		log.Fatalf("creating uretprobe: %s", err)
 	}
