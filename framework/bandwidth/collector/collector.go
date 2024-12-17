@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"accumulation/bandwidth/model"
+	model2 "accumulation/framework/bandwidth/model"
 	"context"
 	"runtime/debug"
 	"sync"
@@ -21,7 +21,7 @@ type BandwidthCollector struct {
 	mutex             *sync.Mutex
 	isRunning         atomic.Bool
 	bpfFilter         string
-	stats             map[string]*model.Bandwidth
+	stats             map[string]*model2.Bandwidth
 	lastCollectorTime int64
 }
 
@@ -30,7 +30,7 @@ func NewBandwidthCollector(deviceName, bpfFilter, macAddress string) *BandwidthC
 		deviceName: deviceName,
 		macAddress: macAddress,
 		bpfFilter:  bpfFilter,
-		stats:      map[string]*model.Bandwidth{},
+		stats:      map[string]*model2.Bandwidth{},
 		mutex:      &sync.Mutex{},
 	}
 }
@@ -92,9 +92,9 @@ func (tc *BandwidthCollector) loopReadPacket() {
 				ethernet := ethernetLayer.(*layers.Ethernet)
 				// 如果封包的目的MAC是本机则表示是下行的数据包，否则为上行
 				if ethernet.DstMAC.String() == tc.macAddress {
-					tc.addPacketLen(len(packet.Data()), ipPort.dstIP, ipPort.dstPort, model.Down)
+					tc.addPacketLen(len(packet.Data()), ipPort.dstIP, ipPort.dstPort, model2.Down)
 				} else if ethernet.SrcMAC.String() == tc.macAddress {
-					tc.addPacketLen(len(packet.Data()), ipPort.srcIP, ipPort.srcPort, model.Up)
+					tc.addPacketLen(len(packet.Data()), ipPort.srcIP, ipPort.srcPort, model2.Up)
 				}
 			}
 		}
@@ -129,12 +129,12 @@ type IpPortInfo struct {
 	dstPort string
 }
 
-func (tc *BandwidthCollector) addPacketLen(pcapDataLen int, ip string, port string, trafficType model.TrafficType) {
+func (tc *BandwidthCollector) addPacketLen(pcapDataLen int, ip string, port string, trafficType model2.TrafficType) {
 	tc.mutex.Lock()
 	defer tc.mutex.Unlock()
 	bandwidth, ok := tc.stats[ip+":"+port]
 	if !ok {
-		bandwidth = &model.Bandwidth{
+		bandwidth = &model2.Bandwidth{
 			MacAddress: tc.macAddress,
 			Ip:         ip,
 			Port:       port,
@@ -145,16 +145,16 @@ func (tc *BandwidthCollector) addPacketLen(pcapDataLen int, ip string, port stri
 	bandwidth.AddPacketLen(int32(pcapDataLen), trafficType)
 }
 
-func (tc *BandwidthCollector) ExportAndClean() []*model.Bandwidth {
+func (tc *BandwidthCollector) ExportAndClean() []*model2.Bandwidth {
 	tc.mutex.Lock()
 	defer tc.mutex.Unlock()
-	var result []*model.Bandwidth
+	var result []*model2.Bandwidth
 	endTime := time.Now().Unix()
 	for _, v := range tc.stats {
 		v.CollectTime = endTime
 		result = append(result, v)
 	}
 	tc.lastCollectorTime = endTime
-	tc.stats = make(map[string]*model.Bandwidth)
+	tc.stats = make(map[string]*model2.Bandwidth)
 	return result
 }

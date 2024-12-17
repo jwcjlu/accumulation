@@ -1,11 +1,11 @@
 package report
 
 import (
-	"accumulation/bandwidth/api"
-	"accumulation/bandwidth/collector"
-	"accumulation/bandwidth/conf"
-	"accumulation/bandwidth/model"
-	"accumulation/bandwidth/store"
+	api2 "accumulation/framework/bandwidth/api"
+	"accumulation/framework/bandwidth/collector"
+	"accumulation/framework/bandwidth/conf"
+	"accumulation/framework/bandwidth/model"
+	"accumulation/framework/bandwidth/store"
 	"accumulation/pkg/nnet"
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
@@ -17,7 +17,7 @@ import (
 const defaultBpfFilter = "udp or tcp"
 
 type bandwidthReportManager struct {
-	client       api.BandwidthReportClient
+	client       api2.BandwidthReportClient
 	collectors   []*collector.BandwidthCollector
 	engine       store.BandwidthEngine
 	mutex        *sync.Mutex
@@ -26,7 +26,7 @@ type bandwidthReportManager struct {
 	job          *BandwidthReportJob
 }
 
-func NewBandwidthReportManager(client api.BandwidthReportClient, job *BandwidthReportJob, data *conf.Data) api.BandwidthReportManager {
+func NewBandwidthReportManager(client api2.BandwidthReportClient, job *BandwidthReportJob, data *conf.Data) api2.BandwidthReportManager {
 	return &bandwidthReportManager{
 		client:       client,
 		mutex:        &sync.Mutex{},

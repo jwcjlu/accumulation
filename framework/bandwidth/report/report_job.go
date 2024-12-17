@@ -1,10 +1,10 @@
 package report
 
 import (
-	"accumulation/bandwidth/api"
-	"accumulation/bandwidth/conf"
-	"accumulation/bandwidth/model"
-	"accumulation/bandwidth/store"
+	"accumulation/framework/bandwidth/api"
+	"accumulation/framework/bandwidth/conf"
+	"accumulation/framework/bandwidth/model"
+	"accumulation/framework/bandwidth/store"
 	"accumulation/pkg/log"
 	"context"
 

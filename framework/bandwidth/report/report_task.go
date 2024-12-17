@@ -1,9 +1,9 @@
 package report
 
 import (
-	"accumulation/bandwidth/api"
-	"accumulation/bandwidth/model"
-	"accumulation/bandwidth/store"
+	"accumulation/framework/bandwidth/api"
+	model2 "accumulation/framework/bandwidth/model"
+	"accumulation/framework/bandwidth/store"
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
@@ -15,7 +15,7 @@ import (
 )
 
 type BandwidthReportTask struct {
-	session        *model.Session
+	session        *model2.Session
 	isRunnable     atomic.Bool
 	lastStatTime   int64
 	engine         store.BandwidthEngine
@@ -28,7 +28,7 @@ type BandwidthReportTask struct {
 }
 
 func NewBandwidthReportTask(
-	sess *model.Session,
+	sess *model2.Session,
 	engine store.BandwidthEngine,
 	job *BandwidthReportJob,
 	manager api.BandwidthReportManager) *BandwidthReportTask {
@@ -80,7 +80,7 @@ func (trt *BandwidthReportTask) periodFetchBandwidth() {
 		}
 	}()
 	now := time.Now().Unix()
-	filter := func(bandwidth *model.Bandwidth) bool {
+	filter := func(bandwidth *model2.Bandwidth) bool {
 		if len(trt.session.StreamIp) > 0 && bandwidth.Ip != trt.session.StreamIp {
 			return false
 		}
@@ -95,17 +95,17 @@ func (trt *BandwidthReportTask) periodFetchBandwidth() {
 		return
 	}
 	trt.lastStatTime = now
-	upTotal, downTotal := model.NewBandwidths(bandwidths).Group()
+	upTotal, downTotal := model2.NewBandwidths(bandwidths).Group()
 	if upTotal+downTotal < 1 {
 		return
 	}
-	portFilter := func(bandwidth *model.Bandwidth) bool {
+	portFilter := func(bandwidth *model2.Bandwidth) bool {
 		if len(trt.session.StreamPorts) > 0 && !trt.session.StreamPorts.Contains(bandwidth.Port) {
 			return false
 		}
 		return true
 	}
-	upstream, downstream := model.NewBandwidths(model.NewBandwidths(bandwidths).Filter(portFilter)).Group()
+	upstream, downstream := model2.NewBandwidths(model2.NewBandwidths(bandwidths).Filter(portFilter)).Group()
 	if upstream+downstream < 1 {
 		return
 	}
@@ -113,9 +113,9 @@ func (trt *BandwidthReportTask) periodFetchBandwidth() {
 	trt.no++
 }
 
-func (trt *BandwidthReportTask) buildReportFlowBizRequest(upTotal, downTotal, upstream, downstream int32) *model.ReportFlowBizRequest {
+func (trt *BandwidthReportTask) buildReportFlowBizRequest(upTotal, downTotal, upstream, downstream int32) *model2.ReportFlowBizRequest {
 
-	return &model.ReportFlowBizRequest{}
+	return &model2.ReportFlowBizRequest{}
 
 }
 

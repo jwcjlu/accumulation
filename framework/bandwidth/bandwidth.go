@@ -1,8 +1,8 @@
 package bandwidth
 
 import (
-	"accumulation/bandwidth/api"
-	"accumulation/bandwidth/model"
+	"accumulation/framework/bandwidth/api"
+	model2 "accumulation/framework/bandwidth/model"
 	"context"
 	"fmt"
 )
@@ -16,8 +16,8 @@ func NewBandWidthUseCase(bandwidthReportManager api.BandwidthReportManager) *Use
 	return &UseCase{bandwidthReportManager: bandwidthReportManager}
 }
 
-func (useCase *UseCase) Start(ctx context.Context, gameStarted *model.GameStarted) error {
-	session := &model.Session{
+func (useCase *UseCase) Start(ctx context.Context, gameStarted *model2.GameStarted) error {
+	session := &model2.Session{
 		Start:        gameStarted.Start,
 		FlowID:       gameStarted.FlowID,
 		BizID:        gameStarted.BizID,
@@ -35,8 +35,8 @@ func (useCase *UseCase) Start(ctx context.Context, gameStarted *model.GameStarte
 	return useCase.bandwidthReportManager.StartReport(ctx, session)
 }
 
-func (useCase *UseCase) Stop(ctx context.Context, gameStop *model.GameStop) error {
-	session := &model.Session{
+func (useCase *UseCase) Stop(ctx context.Context, gameStop *model2.GameStop) error {
+	session := &model2.Session{
 		Start:      gameStop.Start,
 		FlowID:     gameStop.FlowID,
 		BizID:      gameStop.BizID,

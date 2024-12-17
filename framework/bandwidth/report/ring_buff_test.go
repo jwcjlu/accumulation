@@ -1,7 +1,7 @@
 package report_test
 
 import (
-	"accumulation/bandwidth/report"
+	"accumulation/framework/bandwidth/report"
 	"sync"
 	"testing"
 )

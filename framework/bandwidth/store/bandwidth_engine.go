@@ -1,8 +1,8 @@
 package store
 
 import (
-	"accumulation/bandwidth/collector"
-	"accumulation/bandwidth/model"
+	"accumulation/framework/bandwidth/collector"
+	"accumulation/framework/bandwidth/model"
 	"context"
 	"fmt"
 	"runtime/debug"

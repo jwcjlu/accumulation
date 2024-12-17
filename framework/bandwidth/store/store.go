@@ -1,7 +1,7 @@
 package store
 
 import (
-	"accumulation/bandwidth/model"
+	"accumulation/framework/bandwidth/model"
 	"bufio"
 	"context"
 	"encoding/binary"

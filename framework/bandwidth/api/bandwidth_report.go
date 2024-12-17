@@ -1,7 +1,7 @@
 package api
 
 import (
-	"accumulation/bandwidth/model"
+	"accumulation/framework/bandwidth/model"
 	"context"
 )
 
