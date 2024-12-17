@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/shopsprint/decimal v1.3.3
 	github.com/tidwall/gjson v1.18.0
 	github.com/yusufpapurcu/wmi v1.2.3
 	go.opentelemetry.io/otel v1.24.0
