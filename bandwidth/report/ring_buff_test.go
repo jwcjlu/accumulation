@@ -1,7 +1,7 @@
 package report_test
 
 import (
-	"cgvmagent/internal/biz/bandwidth/report"
+	"accumulation/bandwidth/report"
 	"sync"
 	"testing"
 )

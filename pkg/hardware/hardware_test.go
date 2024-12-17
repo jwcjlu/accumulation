@@ -1,8 +1,9 @@
 package hardware_test
 
 import (
+	"accumulation/pkg/hardware"
+
 	"fmt"
-	"gitlab.vrviu.com/cloudgame_backend/rock-stack/pkg/hardware"
 	"testing"
 )
 
