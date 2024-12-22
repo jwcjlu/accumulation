@@ -46,5 +46,5 @@ func HelloWorld(msg string){
 ```
  funlosttime mon -b /root/jas/workspace/go/test_project/test -s main.HelloWorld
 其中-b下接监控的执行包，-s下接监控函数的符号（完全路径）
-![img.png](docs/img.png)
 ```
+![img.png](docs/img.png)
