@@ -1,5 +1,5 @@
 #include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include <bpf_helpers.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/tcp.h>
@@ -8,14 +8,14 @@
 #define MAX_BACKENDS 10
 
 struct backend_info {
-    __u32 ip;
-    __u16 port;
+    __uint32 ip;
+    __uint16 port;
 };
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __uint(max_entries, MAX_BACKENDS);
-    __type(key, __u32); // 哈希键（源IP + 源端口）
+    __type(key, uint32); // 哈希键（源IP + 源端口）
     __type(value, struct backend_info);
 } backend_map SEC(".maps");
 
@@ -80,7 +80,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
 
     // 重新计算IP校验和
     ip->check = 0;
-    ip->check = bpf_csum_diff(0, 0, (__u16 *)ip, sizeof(*ip), 0);
+    ip->check = bpf_csum_diff(0, 0, (uint16 *)ip, sizeof(*ip), 0);
 
     return XDP_TX;
 }
