@@ -8,8 +8,8 @@
 #define MAX_BACKENDS 10
 
 struct backend_info {
-    __uint32 ip;
-    __uint16 port;
+    u32 ip;
+    u16 port;
 };
 
 struct {
@@ -80,7 +80,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
 
     // 重新计算IP校验和
     ip->check = 0;
-    ip->check = bpf_csum_diff(0, 0, (uint16 *)ip, sizeof(*ip), 0);
+    ip->check = bpf_csum_diff(0, 0, (u16 *)ip, sizeof(*ip), 0);
 
     return XDP_TX;
 }
