@@ -15,8 +15,6 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	github.com/vishvananda/netlink v1.1.1-0.20200218174631-5f2fc868c2d0
 	github.com/yusufpapurcu/wmi v1.2.3
-	gitlab.vrviu.com/cloudgame_backend/api-proto v1.1.4
-	gitlab.vrviu.com/cloudgame_backend/rock-stack v1.3.5
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
 	go.uber.org/zap v1.27.0
