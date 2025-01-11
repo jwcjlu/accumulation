@@ -1,9 +1,9 @@
 package logfile
 
 import (
+	"accumulation/pkg/log"
 	"context"
 	"fmt"
-	"gitlab.vrviu.com/cloudgame_backend/rock-stack/pkg/log"
 	"io"
 	"io/fs"
 	"os"

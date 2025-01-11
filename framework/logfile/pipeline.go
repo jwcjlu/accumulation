@@ -1,14 +1,13 @@
 package logfile
 
 import (
+	"accumulation/pkg/log"
 	"context"
 	"fmt"
-	"gitlab.vrviu.com/cloudgame_backend/rock-stack/pkg/log"
+
 	"runtime"
 	"strconv"
 	"time"
-
-	v1 "gitlab.vrviu.com/cloudgame_backend/api-proto/protobuf/cg-agent/pipeline/v1"
 )
 
 type PipelineBiz struct {
@@ -18,7 +17,7 @@ func NewPipelineBiz() *PipelineBiz {
 	return &PipelineBiz{}
 }
 
-func (p *PipelineBiz) Pipeline(ctx context.Context, req *v1.PipelineReq) error {
+func (p *PipelineBiz) Pipeline(ctx context.Context) error {
 
 	return fmt.Errorf("no implement")
 }
