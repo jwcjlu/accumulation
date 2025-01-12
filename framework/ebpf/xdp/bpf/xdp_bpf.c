@@ -67,7 +67,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     if (!backend) {
         return XDP_PASS;
     }
-    bpf_printk("[backend] %x ->\n", *backend);
+    bpf_printk("[backend] %x ->\n", backend);
     // 修改目的IP和端口
     ip->daddr = backend->ip;
     if (ip->protocol == IPPROTO_TCP) {
