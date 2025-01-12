@@ -84,10 +84,30 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     }
 
     // 重新计算IP校验和
-    ip->check = 0;
-    ip->check = bpf_csum_diff(0, 0, (__be32 *)ip, sizeof(*ip), 0);
-
+/*    ip->check = 0;
+    ip->check = bpf_csum_diff(0, 0, (__be32 *)ip, sizeof(*ip), 0);*/
+   /* recalculate IP checksum */
+	ip->check = ipv4_csum(ip);
     return XDP_TX;
 }
 
+static __always_inline __u16 csum_fold_helper(__u64 csum)
+{
+	int i;
+#pragma unroll
+	for (i = 0; i < 4; i++)
+	{
+		if (csum >> 16)
+			csum = (csum & 0xffff) + (csum >> 16);
+	}
+	return ~csum;
+}
+
+static __always_inline __u16 ipv4_csum(struct iphdr *iph)
+{
+	iph->check = 0;
+	unsigned long long csum =
+		bpf_csum_diff(0, 0, (unsigned int *)iph, sizeof(struct iphdr), 0);
+	return csum_fold_helper(csum);
+}
 char __license[] SEC("license") = "GPL";
