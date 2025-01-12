@@ -48,7 +48,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     }
 
     // 计算哈希键（源IP + 源端口）
-    __u32 key = ip->saddr;
+    __u32 key ;
     if (ip->protocol == IPPROTO_TCP) {
         struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
         if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*tcp) > data_end) {
@@ -62,13 +62,12 @@ int xdp_load_balancer(struct xdp_md *ctx) {
         }
         key += udp->source;
     }
-
     // 查找后端服务器
     struct backend_info *backend = bpf_map_lookup_elem(&backend_map, &key);
     if (!backend) {
         return XDP_PASS;
     }
-
+    bpf_printk("[backend] %x ->\n", *backend);
     // 修改目的IP和端口
     ip->daddr = backend->ip;
     if (ip->protocol == IPPROTO_TCP) {

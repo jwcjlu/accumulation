@@ -30,7 +30,7 @@ func main() {
 	}
 	defer objs.Close()
 
-	if err := objs.BackendMap.Put(combineIPPort("192.168.31.11", 8080), bpfBackendInfo{Ip: ipToInt("45.113.192.101"),
+	if err := objs.BackendMap.Put(uint32(8080), bpfBackendInfo{Ip: ipToInt("45.113.192.101"),
 		Port: 80}); err != nil {
 		log.Fatalf("Failed to update backend map: %v", err)
 	}
