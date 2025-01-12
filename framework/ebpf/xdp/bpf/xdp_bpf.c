@@ -48,7 +48,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     }
 
     // 计算哈希键（源IP + 源端口）
-    __u32 key ;
+    __u32 key=0 ;
     if (ip->protocol == IPPROTO_TCP) {
         struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
         if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*tcp) > data_end) {
