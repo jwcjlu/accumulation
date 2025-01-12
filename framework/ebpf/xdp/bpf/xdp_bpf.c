@@ -5,13 +5,8 @@
 #include <linux/tcp.h>
 #include <linux/udp.h>
 #include <arpa/inet.h> // 包含 htons 函数的声明
-
+#include "xdp_bpf.h"
 #define MAX_BACKENDS 10
-
-struct backend_info {
-    __u32 ip;
-    __u16 port;
-};
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
@@ -19,6 +14,13 @@ struct {
     __type(key, __u32); // 哈希键（源IP + 源端口）
     __type(value, struct backend_info);
 } backend_map SEC(".maps");
+
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, MAX_BACKENDS);
+    __type(key, struct backend_key); // 哈希键（源IP + 源端口）
+    __type(value, struct backend_info);
+} backend_back_map SEC(".maps");
 
 SEC("xdp")
 int xdp_load_balancer(struct xdp_md *ctx) {
@@ -43,7 +45,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     }
 
     // 只处理TCP和UDP流量
-    if (ip->protocol != IPPROTO_TCP && ip->protocol != IPPROTO_UDP) {
+    if (ip->protocol != IPPROTO_TCP{
         return XDP_PASS;
     }
 
@@ -55,32 +57,39 @@ int xdp_load_balancer(struct xdp_md *ctx) {
             return XDP_PASS;
         }
         key = htons(tcp->dest);
-    } else if (ip->protocol == IPPROTO_UDP) {
-        struct udphdr *udp = data + sizeof(*eth) + sizeof(*ip);
-        if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*udp) > data_end) {
-            return XDP_PASS;
-        }
-        key = htons(udp->dest);
     }
+   struct backend_key bkey ;
+    bkey.bindaddr=ip->saddr;
+    bkey.bindport=key;
+     back_backend = bpf_map_lookup_elem(backend_back_map, &bkey);
+     if back_connection{
+       ip->daddr = back_backend->ip;
+        if (ip->protocol == IPPROTO_TCP) {
+               struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
+               tcp->dest = htons(backend->port);
+          }
+        ip->check = ipv4_csum(ip);
+        return XDP_TX;
+     }
     // 查找后端服务器
     struct backend_info *backend = bpf_map_lookup_elem(&backend_map, &key);
     if (!backend) {
         return XDP_PASS;
     }
-  bpf_printk("Backend found: IP=%u.%u.%u.%u, Port=%u\n",
-                 (backend->ip >> 24) & 0xFF,
-                 (backend->ip >> 16) & 0xFF,
-                 (backend->ip >> 8) & 0xFF,
-                 backend->ip & 0xFF,
-                 backend->port);
+   bpf_printk("Backend found: IP=");
+   bpf_printk("%u.", (backend->ip >> 24) & 0xFF);
+   bpf_printk("%u.", (backend->ip >> 16) & 0xFF);
+   bpf_printk("%u.", (backend->ip >> 8) & 0xFF);
+   bpf_printk("%u, ", backend->ip & 0xFF);
+   bpf_printk("Port=%u\n", backend->port);
     // 修改目的IP和端口
     ip->daddr = backend->ip;
+    struct backend_info new_backend;
+    new_backend->ip=ip.saddr
     if (ip->protocol == IPPROTO_TCP) {
         struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
         tcp->dest = htons(backend->port);
-    } else if (ip->protocol == IPPROTO_UDP) {
-        struct udphdr *udp = data + sizeof(*eth) + sizeof(*ip);
-        udp->dest = htons(backend->port);
+        new_backend->port=  tcp->source
     }
 
     // 重新计算IP校验和
@@ -88,26 +97,8 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     ip->check = bpf_csum_diff(0, 0, (__be32 *)ip, sizeof(*ip), 0);*/
    /* recalculate IP checksum */
 	ip->check = ipv4_csum(ip);
+	bpf_map_update_elem(backend_back_map, &bkey, &new_backend, BPF_ANY);
     return XDP_TX;
 }
 
-static __always_inline __u16 csum_fold_helper(__u64 csum)
-{
-	int i;
-#pragma unroll
-	for (i = 0; i < 4; i++)
-	{
-		if (csum >> 16)
-			csum = (csum & 0xffff) + (csum >> 16);
-	}
-	return ~csum;
-}
-
-static __always_inline __u16 ipv4_csum(struct iphdr *iph)
-{
-	iph->check = 0;
-	unsigned long long csum =
-		bpf_csum_diff(0, 0, (unsigned int *)iph, sizeof(struct iphdr), 0);
-	return csum_fold_helper(csum);
-}
 char __license[] SEC("license") = "GPL";
