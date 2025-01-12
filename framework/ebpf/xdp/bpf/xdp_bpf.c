@@ -62,13 +62,17 @@ int xdp_load_balancer(struct xdp_md *ctx) {
         }
         key = htons(udp->dest);
     }
-     bpf_printk("[kye] %x ->\n", key);
     // 查找后端服务器
     struct backend_info *backend = bpf_map_lookup_elem(&backend_map, &key);
     if (!backend) {
         return XDP_PASS;
     }
-    bpf_printk("[backend] %x ->\n", backend);
+  bpf_printk("Backend found: IP=%u.%u.%u.%u, Port=%u\n",
+                 (backend->ip >> 24) & 0xFF,
+                 (backend->ip >> 16) & 0xFF,
+                 (backend->ip >> 8) & 0xFF,
+                 backend->ip & 0xFF,
+                 backend->port);
     // 修改目的IP和端口
     ip->daddr = backend->ip;
     if (ip->protocol == IPPROTO_TCP) {
