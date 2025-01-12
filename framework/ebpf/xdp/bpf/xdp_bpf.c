@@ -54,14 +54,15 @@ int xdp_load_balancer(struct xdp_md *ctx) {
         if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*tcp) > data_end) {
             return XDP_PASS;
         }
-        key += tcp->source;
+        key += tcp->dest;
     } else if (ip->protocol == IPPROTO_UDP) {
         struct udphdr *udp = data + sizeof(*eth) + sizeof(*ip);
         if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*udp) > data_end) {
             return XDP_PASS;
         }
-        key += udp->source;
+        key += udp->dest;
     }
+     bpf_printk("[kye] %x ->\n", key);
     // 查找后端服务器
     struct backend_info *backend = bpf_map_lookup_elem(&backend_map, &key);
     if (!backend) {
