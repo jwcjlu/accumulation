@@ -43,9 +43,14 @@ func main() {
 			panic(err)
 		}
 	}
+
 	err = objs.BackendMap.Pin(BpfMapPath)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if err := objs.BackendMap.Put(uint32(8080), bpfBackendInfo{Ip: ipToInt("45.113.192.101"),
+		Port: 80}); err != nil {
+		log.Fatalf("Failed to update backend_map: %v", err)
 	}
 	m, err := ebpf.LoadPinnedMap(BpfMapPath, &ebpf.LoadPinOptions{})
 	if err != nil {
