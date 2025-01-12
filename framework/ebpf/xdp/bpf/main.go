@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/cilium/ebpf"
 	"github.com/vishvananda/netlink"
 	"log"
 	"net"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	BpfMapPath = "/sys/fs/bpf/forward_map"
+	BpfMapPath = "/sys/fs/bpf/backend_map"
 
 	XDP_FLAGS_AUTO_MODE = 0 // custom
 	XDP_FLAGS_DRV_MODE  = 1 << 2
@@ -30,11 +31,6 @@ func main() {
 	}
 	defer objs.Close()
 
-	if err := objs.BackendMap.Put(uint32(8080), bpfBackendInfo{Ip: ipToInt("45.113.192.101"),
-		Port: 80}); err != nil {
-		log.Fatalf("Failed to update backend map: %v", err)
-	}
-
 	// 绑定 XDP 程序到网络接口
 	link, err := netlink.LinkByName("eth0")
 	if err != nil {
@@ -47,6 +43,19 @@ func main() {
 			panic(err)
 		}
 	}
+	err = objs.BackendMap.Pin(BpfMapPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	m, err := ebpf.LoadPinnedMap(BpfMapPath, &ebpf.LoadPinOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Put(uint32(8080), bpfBackendInfo{Ip: ipToInt("45.113.192.101"),
+		Port: 80}); err != nil {
+		log.Fatalf("Failed to update backend map: %v", err)
+	}
+
 	log.Println("XDP load balancer is running. Press Ctrl+C to stop.")
 
 	// 等待中断信号
