@@ -7,7 +7,9 @@
 #include <arpa/inet.h> // 包含 htons 函数的声明
 #include "xdp_bpf.h"
 #define MAX_BACKENDS 10
-
+#define PROXY_IP 0x300030a
+#define IP1 0x2d71c065
+#define IP2 0x65c0712d
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __uint(max_entries, MAX_BACKENDS);
@@ -45,28 +47,41 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     }
 
     // 只处理TCP和UDP流量
-    if (ip->protocol != IPPROTO_TCP{
+    if (ip->protocol != IPPROTO_TCP){
         return XDP_PASS;
     }
 
     // 计算哈希键（源IP + 源端口）
     __u32 key=0 ;
+     struct backend_key bkey ;
+     bkey.bindaddr=ip->daddr;
     if (ip->protocol == IPPROTO_TCP) {
         struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
         if (data + sizeof(*eth) + sizeof(*ip) + sizeof(*tcp) > data_end) {
             return XDP_PASS;
         }
         key = htons(tcp->dest);
+       bkey.bindport=htons(tcp->source);
     }
-   struct backend_key bkey ;
-    bkey.bindaddr=ip->saddr;
-    bkey.bindport=key;
-     back_backend = bpf_map_lookup_elem(backend_back_map, &bkey);
-     if back_connection{
+
+     if (ip->daddr==IP1){
+           bpf_printk("source found: destIP=%x,sourceIP=%x",ip->daddr,ip->saddr);
+      }
+      if (ip->daddr==IP2){
+        bpf_printk("source found: destIP=%x,sourceIP=%x",ip->daddr,ip->saddr);
+       }
+      if (ip->saddr==IP1){
+       bpf_printk("source found: destIP=%x,sourceIP=%x",ip->daddr,ip->saddr);
+      }
+      if (ip->saddr==IP2){
+        bpf_printk("source found: destIP=%x,sourceIP=%x",ip->daddr,ip->saddr);
+     }
+    struct backend_info *back_backend = bpf_map_lookup_elem(&backend_back_map, &bkey);
+     if (back_backend){
        ip->daddr = back_backend->ip;
         if (ip->protocol == IPPROTO_TCP) {
                struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
-               tcp->dest = htons(backend->port);
+               tcp->dest = htons(back_backend->port);
           }
         ip->check = ipv4_csum(ip);
         return XDP_TX;
@@ -81,15 +96,26 @@ int xdp_load_balancer(struct xdp_md *ctx) {
    bpf_printk("%u.", (backend->ip >> 16) & 0xFF);
    bpf_printk("%u.", (backend->ip >> 8) & 0xFF);
    bpf_printk("%u, ", backend->ip & 0xFF);
+   bpf_printk("Backend found: sourceIP=");
+   bpf_printk("%u, ", (ip->saddr >> 24) & 0xFF);
+   bpf_printk("%u, ", (ip->saddr >> 16) & 0xFF);
+   bpf_printk("%u, ", (ip->saddr >> 8) & 0xFF);
+   bpf_printk("%u, ", ip->saddr  & 0xFF);
+   bpf_printk("Backend found: destIP=");
+   bpf_printk("%u, ", (ip->daddr >> 24) & 0xFF);
+   bpf_printk("%u, ", (ip->daddr >> 16) & 0xFF);
+   bpf_printk("%u, ", (ip->daddr >> 8) & 0xFF);
+   bpf_printk("%u, ", ip->daddr  & 0xFF);
    bpf_printk("Port=%u\n", backend->port);
     // 修改目的IP和端口
     ip->daddr = backend->ip;
     struct backend_info new_backend;
-    new_backend->ip=ip.saddr
+    new_backend.ip=ip->daddr;
     if (ip->protocol == IPPROTO_TCP) {
         struct tcphdr *tcp = data + sizeof(*eth) + sizeof(*ip);
         tcp->dest = htons(backend->port);
-        new_backend->port=  tcp->source
+        new_backend.port=  tcp->dest;
+        bkey.bindport=backend->port;
     }
 
     // 重新计算IP校验和
@@ -97,7 +123,7 @@ int xdp_load_balancer(struct xdp_md *ctx) {
     ip->check = bpf_csum_diff(0, 0, (__be32 *)ip, sizeof(*ip), 0);*/
    /* recalculate IP checksum */
 	ip->check = ipv4_csum(ip);
-	bpf_map_update_elem(backend_back_map, &bkey, &new_backend, BPF_ANY);
+	bpf_map_update_elem(&backend_back_map, &bkey, &new_backend, BPF_ANY);
     return XDP_TX;
 }
 
